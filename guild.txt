@@ -1,0 +1,106 @@
+pre-condition:
+    nodejs
+    npm
+    yarn
+    reactnative
+    androidstudio
+    qemu
+    gradle
+
+Environment preparation (assume u already have the environment for node/react/Cordova):
+Install react-native/expo as global
+npm install react-native -g
+npm install expo -g
+npm install expo-cli -g
+
+add react-native into your envrionment path.
+
+goto your project workspace folder
+    react-native init YOUR_PROJ_NAME
+Then a new folder will be created under workspace, please note this folder should not be existed before the command running.
+    cd YOUR_PROJ_NAME
+
+then copy the package.json into your project path then run:
+    yarn
+
+!!! This process will cost much time, wait wait wait!
+
+And react-native-camera may need install standalone:
+    yarn add react-native-camera
+
+then do the link manually:
+
+    react-native link react-native-vector-icons
+    react-native link react-native-device-info
+    react-native link react-native-image-picker
+    react-native link react-native-amap3d
+    react-native link react-native-amap-geolocation
+    react-native link react-native-fs
+    react-native link react-native-camera
+    react-native link react-native-push-notification
+
+make sure all the link is done successfully.
+
+Copy follow code into
+    include ':RCTWeChat'
+    project(':RCTWeChat').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-wechat/android')
+into YOUR_PROJ_NAME\android\settings.gradle
+
+change the value 'minSdkVersion = 16' to in YOUR_PROJ_NAME\android\build.gradle
+    minSdkVersion = 21
+Note: This action will let your app do not support android 5 or lower version!!!
+and add follow code into the file:
+    googlePlayServicesVersion = "+"
+    firebaseVersion = "+"
+    supportLibVersion = 28
+
+Add follow code into
+a:
+     implementation "androidx.annotation:annotation:1.1.0"
+     compile project(':RCTWeChat')
+b:
+     missingDimensionStrategy 'react-native-camera', 'general' // HYJ add for react-native-camera
+into YOUR_PROJ_NAME\android\app\build.gradle
+
+
+add follow code into
+    -keep class com.tencent.mm.sdk.** {
+       *;
+    }
+into YOUR_PROJ_NAME\android\app\proguard-rules.pro
+
+Open YOUR_PROJ_NAME\android\app\src\main\AndroidManifest.xml
+add the permission and wechat activity just like the demo project. Also u need to add a meta tag for AMAP's key and several tags for push notification.
+Please compare with demo project
+
+Copy follow code into
+import com.theweflex.react.WeChatPackage;
+packages.add(new WeChatPackage());
+into YOUR_PROJ_NAME\android\app\src\main\java\com\YOUR_PROJ_NAME\MainApplication.java
+add copy the YOUR_PROJ_NAME\android\app\src\main\java\com\YOUR_PROJ_NAME\wxapi folder to your project
+after the copy, modify the java file which under the wxapi folder, for right package string.
+
+go to file YOUR_PROJ_NAME\node_modules\react-native-wechat\android\src\main\java\com\theweflex\react\WeChatModule.java
+and file YOUR_PROJ_NAME\node_modules\react-native-amap-geolocation\android\main\java\cn\qiuxiang\react\geolocation\AMapGeolocationModule.java
+change code 'import android.support.annotation.Nullable;' to
+    //import android.support.annotation.Nullable;
+    import androidx.annotation.Nullable;
+
+    and change "@NonNull" to "@Nullable"
+Pay attention, this step need to be done while update node modules
+
+
+
+copy the assets&res&src folder into the project folder.
+
+
+copy react-native-highcharts folder from node-modules to src/lib
+than modify the code in highcharts:
+                a) webview should import from react-native-webview
+                b) "this.reRenderWebView.bind(this)" to replace "this.reRenderWebView" to void "this.setState is not a function" issue
+
+
+
+How to build release version and release key:
+https://blog.csdn.net/aexwx/article/details/79436445
+
